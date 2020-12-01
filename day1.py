@@ -1,24 +1,42 @@
 import numpy as np
+import time
 
 input = np.loadtxt("input/day1.txt", dtype="int")
 
-L = len(input)
+start = time.time()
+for num1 in input:
+    for num2 in input:
+        if num1 + num2 == 2020:
+            print(f"{num1} + {num2} == 2020")
+            print(f"{num1} * {num2} == {num1 * num2}")
+            break
+    else:
+        # Continue if the inner loop wasn't broken.
+        continue
+    # Inner loop was broken, break the outer.
+    break
+part1 = time.time()
 
-sumarray = np.zeros((L, L))
-for m, num1 in enumerate(input):
-    for n, num2 in enumerate(input):
-        sumarray[m, n] = num1 + num2
+for num1 in input:
+    for num2 in input:
+        for num3 in input:
+            if num1 + num2 + num3 == 2020:
+                print(f"{num1} + {num2} + {num3} == 2020")
+                print(f"{num1} * {num2} * {num3} == {num1 * num2 * num3}")
+                break
+        else:
+            # Continue if the inner loop wasn't broken.
+            continue
+        # Inner loop was broken, break the outer.
+        break
+    else:
+        # Continue if the inner loop wasn't broken.
+        continue
+    # Inner loop was broken, break the outer.
+    # is there a better way to do this? Idk, probably
+    break
+part2 = time.time()
 
-sum2020 = np.unique(np.nonzero(sumarray == 2020))
-print(sum2020)
-print(input[sum2020].prod())
-
-sumarray = np.zeros((L, L, L))
-for i, num1 in enumerate(input):
-    for j, num2 in enumerate(input):
-        for k, num3 in enumerate(input):
-            sumarray[i, j, k] = num1 + num2 + num3
-
-sum2020 = np.unique(np.nonzero(sumarray == 2020))
-print(sum2020)
-print(input[sum2020].prod())
+# just for fun, timing it
+print(f"part 1: {part1 - start} sec")
+print(f"part 2: {part2 - part1} sec")
