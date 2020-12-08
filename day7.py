@@ -17,7 +17,14 @@ def build_rules(file):
     regex = " bags?[,.]? *"
     for color in ruledict:
         # the last item in the list is always just "\n" so throw it out
-        ruledict[color] = re.split(regex, ruledict[color].strip())[:-1]
+        contents = re.split(regex, ruledict[color].strip())[:-1]
+        # actually let's prep for part 2, because i expect to need the numbers
+        # for it. Let's make contents another dict actually
+        if contents == ['no other']:
+            ruledict[color] = contents
+        else:
+            ruledict[color] = {color2: num for (num, color2) in (
+                s.split(maxsplit=1) for s in contents)}
 
     return ruledict
 
@@ -25,7 +32,12 @@ def build_rules(file):
 def main():
     with open("input/day7.txt") as f:
         rules = build_rules(f)
-    pprint.pprint(rules)
+
+    temp = {}
+    for rule in rules:
+        if "salmon" in rule:
+            temp[rule] = rules[rule]
+    pprint.pprint(temp)
 
 
 if __name__ == '__main__':
