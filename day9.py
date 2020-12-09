@@ -50,5 +50,6 @@ def main():
     # print(min(listsum), max(listsum))
     print(f"Part 2: {min(listsum) + max(listsum)}")
 
+
 if __name__ == '__main__':
     main()
