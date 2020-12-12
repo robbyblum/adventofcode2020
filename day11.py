@@ -10,6 +10,12 @@ def pprint_c(array):
 
 def check_neighbors(inarray, loc):
     # loc is a tuple (row_i, col_j)
+
+    # define limits in each direction
+    Nlim = -1
+    Wlim = -1
+    Slim, Elim = inarray.shape
+
     # construct neighbors
     north = (loc[0], loc[1] + 1)
     east = (loc[0] + 1, loc[1])
@@ -22,12 +28,55 @@ def check_neighbors(inarray, loc):
 
     adjFilled = 0
     for nbr in (north, east, south, west, ne, se, sw, nw):
-        if nbr[0] < inarray.shape[0] and nbr[0] > -1:
-            if nbr[1] < inarray.shape[1] and nbr[1] > -1:
+        if nbr[0] < Slim and nbr[0] > Nlim:
+            if nbr[1] < Elim and nbr[1] > Wlim:
                 # check each neighbor now
                 if inarray[nbr] == "#":
                     adjFilled += 1
     return adjFilled
+
+
+def check_visible(inarray, inloc):
+    # loc is a tuple (row_i, col_j)
+    def step_loc(inloc, dirstr):
+        # subfunction to step in a direction based on a string, why not
+        # string can be composed of the characters NESW. I won't pass it
+        # nonsensical stuff like NS or NESW or whatever, so I won't write it
+        # to check the input logic very carefully
+        i, j = inloc
+        if "N" in dirstr:
+            ii = i - 1
+        elif "S" in dirstr:
+            ii = i + 1
+        else:
+            ii = i
+
+        if "W" in dirstr:
+            jj = j - 1
+        elif "E" in dirstr:
+            jj = j + 1
+        else:
+            jj = j
+
+        return (ii, jj)
+
+    # define limits in each direction
+    Nlim = -1
+    Wlim = -1
+    Slim, Elim = inarray.shape
+
+    visibleFilled = 0
+    for dirstr in ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]:
+        loc = step_loc(inloc, dirstr)
+        while (loc[0] < Slim and loc[0] > Nlim) and (loc[1] < Elim and loc[1] > Wlim):
+            if inarray[loc] == "#":
+                visibleFilled += 1
+                break
+            elif inarray[loc] == "L":
+                break
+            loc = step_loc(loc, dirstr)
+
+    return visibleFilled
 
 
 def main():
@@ -60,6 +109,31 @@ def main():
     # pprint_c(arrayN)
     # print(iterationNum)
     print(f"Part 1: {np.count_nonzero(arrayN == '#')}")
+
+    # part 2: annoying sightline stuff instead of simple adjacency. Repeat the
+    # same basic loop as before though.
+
+    # make two arrays, one for step M, and one for step M+1 (N)
+    arrayM = inarray.copy()
+    arrayN = inarray.copy()
+    iterationNum = 0
+    while True:
+        for loc, spot in np.ndenumerate(arrayM):
+            if spot == "L":
+                if check_visible(arrayM, loc) == 0:
+                    arrayN[loc] = "#"
+            elif spot == "#":
+                if check_visible(arrayM, loc) >= 5:
+                    arrayN[loc] = "L"
+
+        # pprint_c(arrayN[:, :])
+        # print()
+        iterationNum += 1
+        if (arrayM == arrayN).all():
+            break
+        else:
+            arrayM = arrayN.copy()
+    print(f"Part 2: {np.count_nonzero(arrayN == '#')}")
 
 
 if __name__ == '__main__':
