@@ -37,7 +37,7 @@
 import re
 
 
-def load_file(path):
+def load_input(path):
     # load the data in three chunks
     with open(path) as f:
         raw = f.read()
@@ -47,22 +47,52 @@ def load_file(path):
     ruleslist = raw_rules.splitlines()
     rules = parse_rules(ruleslist)
 
-    mytix = raw_mytix.splitlines()[1].split(',')
+    mytix = [int(n) for n in raw_mytix.splitlines()[1].split(',')]
 
-    neartix = [t.split(',') for t in raw_neartix.splitlines()[1:]]
+    # surely there's a better way to do this, that I'm not remembering...
+    raw_neartix = [t.split(',') for t in raw_neartix.splitlines()[1:]]
+    neartix = []
+    for tix in raw_neartix:
+        neartix.append([int(n) for n in tix])
+
     return rules, mytix, neartix
 
 
 def parse_rules(ruleslist):
     """parse a list of rules into a dict of rules"""
-    return ruleslist
+    rules = {}
+    for r in ruleslist:
+        key, low1, hi1, low2, hi2 = re.split(": |-| or ", r)
+        rules[key] = [(int(low1), int(hi1)), (int(low2), int(hi2))]
+    return rules
+
+
+def inrange(number, range):
+    """convenience function. is number inside range? range is tuple (low, hi),
+    checks range inclusive of the endpoints"""
+    return (number >= range[0] and number <= range[1])
 
 
 def main():
-    rules, mytix, neartix = load_file("input/day16.txt")
-    print(rules)
-    print(mytix)
-    # print(neartix)
+    rules, mytix, neartix = load_input("input/day16.txt")
+
+    # I suppose I could merge the valid ranges and check fewer things...or I
+    # could just not do that. I'm going to just not do that.
+    invalid = []
+    for tix in neartix:
+        for n in tix:
+            for rule in rules.values():
+                if inrange(n, rule[0]) or inrange(n, rule[1]):
+                    # if we find a valid rule, move on to the next number
+                    break
+            # if we exhausted the list without finding a valid rule, it's
+            # an invalid number
+            else:
+                invalid.append(n)
+    # invalid.sort()
+    # print(invalid)
+    # print(len(invalid), len(set(invalid)))
+    print("Part 1:", sum(invalid))
 
 
 if __name__ == '__main__':
