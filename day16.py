@@ -35,6 +35,7 @@
 # Consider the validity of the nearby tickets you scanned. What is
 # your ticket scanning error rate?
 import re
+from pprint import pprint
 
 
 def load_input(path):
@@ -75,7 +76,9 @@ def inrange(number, range):
 
 def main():
     rules, mytix, neartix = load_input("input/day16.txt")
+    fields = list(rules.keys())
 
+    # PART 1:
     # I suppose I could merge the valid ranges and check fewer things...or I
     # could just not do that. I'm going to just not do that.
     invalid = []
@@ -93,6 +96,55 @@ def main():
     # print(invalid)
     # print(len(invalid), len(set(invalid)))
     print("Part 1:", sum(invalid))
+
+    # PART 2:
+    # oops I should have been tracking which tickets were invalid. Go back and
+    # do that now...
+    validtix = []
+    for tix in neartix:
+        if not any(n in invalid for n in tix):
+            validtix.append(tix)
+
+    # for each rule, find all positions that *could* correspond to that rule
+    validrules = {key: [] for key in fields}
+    for i in range(len(mytix)):
+        near_n = [t[i] for t in validtix]
+        for field in fields:
+            r1, r2 = rules[field][0:2]
+            if all((inrange(n, r1) or inrange(n, r2)) for n in near_n):
+                validrules[field].append(i)
+
+    # print(validrules)
+
+    # Now I want to assume that one of these only has 1 valid possibility.
+    # This happens to be 'class': [3] for me. Start there, assign position 3
+    # to the 'class' rule, and remove 3 from all the other lists for other
+    # rules. Then go to the next shortest list of valid locations, and repeat.
+    lengths = [len(v) for v in (validrules[f] for f in fields)]
+    fields_sort = [x for _, x in sorted(zip(lengths, fields),
+                                        key=lambda pair: pair[0])]
+    # print(fields_sort)
+    rules_assign = {}
+    while len(fields_sort) > 0:
+        fs = fields_sort.pop(0)
+        pos = validrules.pop(fs)[0]
+        rules_assign[fs] = pos
+        for rule in validrules:
+            validrules[rule].remove(pos)
+    print("{field: position}:", rules_assign)
+
+    mydepfields = []
+    depfields = ['departure location', 'departure station',
+                 'departure platform', 'departure track',
+                 'departure date', 'departure time']
+    for fs in depfields:
+        pos = rules_assign[fs]
+        mydepfields.append(mytix[pos])
+    print(mydepfields)
+    prod = 1
+    for n in mydepfields:
+        prod *= n
+    print("Part 2:", prod)
 
 
 if __name__ == '__main__':
