@@ -19,54 +19,6 @@ import collections
 with open("input/day19.txt") as f:
     inp = f.read().split("\n\n")
 
-# inp = """42: 9 14 | 10 1
-# 9: 14 27 | 1 26
-# 10: 23 14 | 28 1
-# 1: "a"
-# 11: 42 31
-# 5: 1 14 | 15 1
-# 19: 14 1 | 14 14
-# 12: 24 14 | 19 1
-# 16: 15 1 | 14 14
-# 31: 14 17 | 1 13
-# 6: 14 14 | 1 14
-# 2: 1 24 | 14 4
-# 0: 8 11
-# 13: 14 3 | 1 12
-# 15: 1 | 14
-# 17: 14 2 | 1 7
-# 23: 25 1 | 22 14
-# 28: 16 1
-# 4: 1 1
-# 20: 14 14 | 1 15
-# 3: 5 14 | 16 1
-# 27: 1 6 | 14 18
-# 14: "b"
-# 21: 14 1 | 1 14
-# 25: 1 1 | 1 14
-# 22: 14 14
-# 8: 42
-# 26: 14 22 | 1 20
-# 18: 15 15
-# 7: 14 5 | 1 21
-# 24: 14 1
-#
-# abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa
-# bbabbbbaabaabba
-# babbbbaabbbbbabbbbbbaabaaabaaa
-# aaabbbbbbaaaabaababaabababbabaaabbababababaaa
-# bbbbbbbaaaabbbbaaabbabaaa
-# bbbababbbbaaaaaaaabbababaaababaabab
-# ababaaaaaabaaab
-# ababaaaaabbbaba
-# baabbaaaabbaaaababbaababb
-# abbbbabbbbaaaababbbbbbaaaababb
-# aaaaabbaabaaaaababaa
-# aaaabbaaaabbaaa
-# aaaabbaabbaaaaaaabbbabbbaaabbaabaaa
-# babaaabbbaaabaababbaabababaaab
-# aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba""".split('\n\n')
-
 
 def expandrules(ruledict, startid):
     inrule = ruledict[startid].split()
@@ -109,12 +61,6 @@ print("Part 1:", numvalid)
 # high up the list of things...
 # what this really means, tbh, is "42 M times, then 31 N times, where M > N"
 # (and N >= 1).
-newrule21 = '(' + expandrules(rules, 42) + '){2}(' + expandrules(rules, 31) + '){1}'
-newrule31 = '(' + expandrules(rules, 42) + '){3}(' + expandrules(rules, 31) + '){1,2}'
-newrule41 = '(' + expandrules(rules, 42) + '){4}(' + expandrules(rules, 31) + '){1,3}'
-newrule51 = '(' + expandrules(rules, 42) + '){5}(' + expandrules(rules, 31) + '){1,4}'
-newrule61 = '(' + expandrules(rules, 42) + '){6}(' + expandrules(rules, 31) + '){1,5}'
-newrule71 = '(' + expandrules(rules, 42) + '){7}(' + expandrules(rules, 31) + '){1,6}'
 
 def countvalid(rule, input):
     n = 0
@@ -123,16 +69,17 @@ def countvalid(rule, input):
             n += 1
     return n
 
-
-# print(countvalid(newrule21, inputs))
-# print(countvalid(newrule31, inputs))
-# print(countvalid(newrule41, inputs))
-# print(countvalid(newrule51, inputs))
-# print(countvalid(newrule61, inputs))
-# print(countvalid(newrule71, inputs))
+rule42 = '(' + expandrules(rules, 42) + ')'
+rule31 = '(' + expandrules(rules, 31) + ')'
 total = 0
-newrules = [newrule21, newrule31, newrule41, newrule51, newrule61, newrule71]
-for nr in newrules:
+n = 1
+while True:
+    nr = f'{rule42}{{{n+1}}}{rule31}{{1,{n}}}'
     total += countvalid(nr, inputs)
+    if countvalid(nr, inputs) == 0:
+        print(n)
+        break
+    else:
+        n += 1
 
 print("Part 2:", total)
