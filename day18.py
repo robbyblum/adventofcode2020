@@ -25,16 +25,33 @@ def parser(input):
     return ans
 
 
-def crawl(input):
+def crawl(input, part2):
     parens = re.search("(\\([^\\(\\)]*\\))", input)
     if parens is None:
-        return parser(input)
+        if part2:
+            return parser(addfirst(input))
+        else:
+            return parser(input)
     else:
         parenblob = parens.group()[1:-1]
-        intermed = parser(parenblob)
+        if part2:
+            intermed = parser(addfirst(parenblob))
+        else:
+            intermed = parser(parenblob)
         intermed_input = input[0:parens.start()] + str(intermed) + \
             input[parens.end():]
-        return crawl(intermed_input)
+        return crawl(intermed_input, part2)
+
+
+def addfirst(input):
+    inlist = input.split()
+
+    while "+" in inlist:
+        p = inlist.index("+") - 1
+        a, plus, b = int(inlist.pop(p)), inlist.pop(p), int(inlist.pop(p))
+        inlist.insert(p, str(a + b))
+
+    return " ".join(inlist)
 
 
 def main():
@@ -46,8 +63,20 @@ def main():
     #          "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"]
     total = 0
     for i in input:
-        total += crawl(i)
+        total += crawl(i, False)
     print("Part 1:", total)
+
+    # part 2...do additions first and then multiplications. opposite operator
+    # precedence from normal...
+    # input = ["2 * 3 + (4 * 5)",
+    #          "5 + (8 * 3 + 9 + 3 * 4 * 3)",
+    #          "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))",
+    #          "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"]
+    total = 0
+    for i in input:
+        # print(crawl(i, True))
+        total += crawl(i, True)
+    print("Part 2:", total)
 
 
 if __name__ == '__main__':
